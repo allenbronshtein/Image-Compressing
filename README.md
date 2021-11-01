@@ -3,6 +3,7 @@ Image compressing using K-means algorithm
 
 
 Dependencies:
+
     python 
     pip
     numpy
