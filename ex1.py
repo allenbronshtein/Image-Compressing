@@ -4,7 +4,6 @@ from sys import argv
 
 APPEND = 0
 FLUSH = 1
-log_body = ''
 
 
 # split points into clusters with corresponding centeroids
@@ -41,15 +40,23 @@ def fix_center(z, means):
 
 
 # log centroids in out file
-def log(z, out, cmd):
-    global log_body
-    s = ''
-    for _z in z:
-        s += f'{_z},'
-    log_body += f"[iter {i}]:{s[:-1]}\n"
-    if cmd == FLUSH:
-        out.write(log_body)
-        out.close()
+def logger(z, out):
+    log_body = ''
+    _out = out
+
+    def log(z, cmd):
+        s = ''
+        nonlocal log_body
+        for _z in z:
+            s += f'{_z},'
+        log_body += f"[iter {i}]:{s[:-1]}\n"
+        print(log_body)
+        if cmd == 1:
+            _out.write(log_body)
+            log_body = ''
+            _out.close()
+
+    return log
 
 
 # Main
@@ -57,11 +64,12 @@ orig_pixels = plt.imread('Image-Compressing/files/dog.jpeg')
 pixels = (orig_pixels.astype(float) / 255).reshape(-1, 3)
 z = np.loadtxt('Image-Compressing/files/cents1.txt').round(4)
 out = open('Image-Compressing/files/test.txt', "a")
+logger = logger(z, out)
 
 for i in range(20):
-    log(z, out, APPEND)
+    logger(z, APPEND)
     clusters = cluster_points(pixels, z)
     means = get_means(clusters).round(4)
     if not np.array_equal(z, means): fix_center(z, means)
     else: break
-log(z, out, FLUSH)
+logger(z, FLUSH)
