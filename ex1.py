@@ -2,38 +2,66 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sys import argv
 
+APPEND = 0
+FLUSH = 1
+log_body = ''
+
 
 # split points into clusters with corresponding centeroids
-def cluster(pixels, z, clusters):
+def cluster_points(pixels, z):
     k = len(z)
+    clusters = [np.empty(shape=[0, 3])] * k
     for p in pixels:
-        min_i = 0
-        min_d = float('inf')
-        for i in range(0, k):
+        min_i, min_d = 0, float('inf')
+        for i in range(k):
             d = np.linalg.norm(z[i] - p)
-            if d < min_d:
-                min_d, min_i = d, i
-        clusters[min_i] = np.append(clusters[min_i], p)
+            if d < min_d: min_d, min_i = d, i
+        clusters[min_i] = np.append(clusters[min_i], [p], axis=0)
+    return clusters
 
 
 # get means of each cluster
 def get_means(clusters):
-    means = []
+    k = len(clusters)
+    means = np.array([]).reshape(0, 3)
     for cluster in clusters:
-        if not cluster:
-            means.append(NULL)
+        size = cluster.size
+        if size:
+            means = np.append(means, [(cluster.sum(axis=0) / size)], axis=0)
+        else:
+            means = np.append(means, None, axis=0)
+    return means
 
 
 # update center to be the clusters mean
-def fix_center():
-    pass
+def fix_center(z, means):
+    k = len(z)
+    for i in range(k):
+        if means[i] is not None: z[i] = means[i]
 
 
-image_fname, centroids_fname, out_fname = 'Image-Compressing/files/dog.jpeg', 'Image-Compressing/files/cents1.txt', 'Image-Compressing/files/out.txt'
-z = np.loadtxt(centroids_fname)  # Load centroids
-orig_pixels = plt.imread(image_fname)
+# log centroids in out file
+def log(z, out, cmd):
+    global log_body
+    s = ''
+    for _z in z:
+        s += f'{_z},'
+    log_body += f"[iter {i}]:{s[:-1]}\n"
+    if cmd == FLUSH:
+        out.write(log_body)
+        out.close()
+
+
+# Main
+orig_pixels = plt.imread('Image-Compressing/files/dog.jpeg')
 pixels = (orig_pixels.astype(float) / 255).reshape(-1, 3)
-clusters = [np.array([])] * len(z)
-cluster(pixels, z, clusters)
-print(clusters)
-get_means(clusters)
+z = np.loadtxt('Image-Compressing/files/cents1.txt').round(4)
+out = open('Image-Compressing/files/test.txt', "a")
+
+for i in range(20):
+    log(z, out, APPEND)
+    clusters = cluster_points(pixels, z)
+    means = get_means(clusters).round(4)
+    if not np.array_equal(z, means): fix_center(z, means)
+    else: break
+log(z, out, FLUSH)
