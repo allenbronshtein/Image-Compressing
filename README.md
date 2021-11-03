@@ -17,11 +17,12 @@ centroid.
 
 
 To run the program:
+
            python ex1.py <image-dir> <ceneteroids-file name> <out-file>
     
-    The image-dir will contain the image of your choice.
+The image-dir will contain the image of your choice.
 
-    The centeroids file will contain the initial centeroids
+The centeroids file will contain the initial centeroids.
     
-    The outfile is a log, it will contain the updated centeroids
+The outfile is a log, it will contain the updated centeroids.
     
