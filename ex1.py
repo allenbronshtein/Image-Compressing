@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sys import argv
 
-APPEND = 0
-FLUSH = 1
+APPEND, FLUSH = 0, 1
 
 
 # split points into clusters with corresponding centeroids
@@ -14,21 +13,26 @@ def cluster_points(pixels, z):
         min_i, min_d = 0, float('inf')
         for i in range(k):
             d = np.linalg.norm(z[i] - p)
-            if d < min_d: min_d, min_i = d, i
+            if d < min_d:
+                min_d, min_i = d, i
         clusters[min_i] = np.append(clusters[min_i], [p], axis=0)
     return clusters
 
 
 # get means of each cluster
-def get_means(clusters):
+def get_means(clusters, z):
     k = len(clusters)
     means = np.array([]).reshape(0, 3)
-    for cluster in clusters:
-        size = cluster.size
-        if size:
-            means = np.append(means, [(cluster.sum(axis=0) / size)], axis=0)
+    for i in range(k):
+        cluster = clusters[i]
+        num_pixels = cluster.size / 3
+        if num_pixels:
+            means = np.append(means, [(cluster.sum(axis=0) / num_pixels)],
+                              axis=0)
         else:
-            means = np.append(means, None, axis=0)
+            means = np.append(means,
+                              np.append(cluster, [z[i]], axis=0),
+                              axis=0)
     return means
 
 
@@ -36,40 +40,43 @@ def get_means(clusters):
 def fix_center(z, means):
     k = len(z)
     for i in range(k):
-        if means[i] is not None: z[i] = means[i]
+        z[i] = means[i]
 
 
 # log centroids in out file
-def logger(z, out):
-    log_body = ''
-    _out = out
+def logger(z):
+    log_body, i = '', 0
 
     def log(z, cmd):
         s = ''
-        nonlocal log_body
+        nonlocal log_body, i
         for _z in z:
             s += f'{_z},'
         log_body += f"[iter {i}]:{s[:-1]}\n"
-        print(log_body)
-        if cmd == 1:
+        i += 1
+        if cmd == FLUSH:
+            _out = open("Image-Compressing/files/out.txt", "w")
             _out.write(log_body)
-            log_body = ''
             _out.close()
+            log_body = ''
 
     return log
 
 
 # Main
-orig_pixels = plt.imread('Image-Compressing/files/dog.jpeg')
+orig_pixels = plt.imread("Image-Compressing/files/dog.jpeg")
 pixels = (orig_pixels.astype(float) / 255).reshape(-1, 3)
-z = np.loadtxt('Image-Compressing/files/cents1.txt').round(4)
-out = open('Image-Compressing/files/test.txt', "a")
-logger = logger(z, out)
+z = np.loadtxt("Image-Compressing/files/cents5.txt").round(4)
+logger = logger(z)
 
-for i in range(20):
-    logger(z, APPEND)
+print('Learning, please wait . . .')
+for _ in range(19):
     clusters = cluster_points(pixels, z)
-    means = get_means(clusters).round(4)
-    if not np.array_equal(z, means): fix_center(z, means)
-    else: break
+    means = get_means(clusters, z).round(4)
+    if not np.array_equal(z, means):
+        fix_center(z, means)
+    else:
+        break
+    logger(z, APPEND)
 logger(z, FLUSH)
+print('Learning done')
