@@ -14,3 +14,14 @@ centroid.
 
 
 <img width="519" alt="dog" src="https://user-images.githubusercontent.com/59067634/140182233-8f9b5bb2-4ec0-4130-8853-98d7c21080c9.PNG">
+
+
+To run the program:
+           python ex1.py <image-dir> <ceneteroids-file name> <out-file>
+    
+    The image-dir will contain the image of your choice.
+
+    The centeroids file will contain the initial centeroids
+    
+    The outfile is a log, it will contain the updated centeroids
+    
