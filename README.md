@@ -25,4 +25,7 @@ The image-dir will contain the image of your choice.
 The centeroids file will contain the initial centeroids.
     
 The outfile is a log, it will contain the updated centeroids.
-    
+
+
+<img width="456" alt="plot" src="https://user-images.githubusercontent.com/59067634/140794447-2f239b32-1c62-4d1f-bb9b-16ca6ddeab5c.PNG">
+
