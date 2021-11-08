@@ -64,15 +64,19 @@ def logger(z):
     return log
 
 
+# Function to draw graph
 def plot(losses):
-    pass
+    plt.xlabel('Iteration')
+    plt.ylabel('Loss')
+    plt.plot(list(range(len(losses))), losses)
+    plt.show()
 
 
 # Main
 orig_pixels = plt.imread("Image-Compressing/files/dog.jpeg")
 pixels = (orig_pixels.astype(float) / 255).reshape(-1, 3)
 n = pixels.size / 3  # Num of pixels
-z = np.loadtxt("Image-Compressing/files/cents1.txt").round(4)  # Centeroids
+z = np.loadtxt("Image-Compressing/files/cents3.txt").round(4)  # Centeroids
 k = len(z)  # Num of centroids
 logger = logger(z)
 print('Learning, please wait . . .')
