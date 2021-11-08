@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 from sys import argv
 
 APPEND, FLUSH = 0, 1
+losses = []
 
 
 # split points into clusters with corresponding centeroids
 def cluster_points(pixels, z):
-    k = len(z)
     clusters = [np.empty(shape=[0, 3])] * k
+    cost = 0
     for p in pixels:
         min_i, min_d = 0, float('inf')
         for i in range(k):
@@ -16,12 +17,13 @@ def cluster_points(pixels, z):
             if d < min_d:
                 min_d, min_i = d, i
         clusters[min_i] = np.append(clusters[min_i], [p], axis=0)
+        cost += min_d
+    losses.append(cost / n)
     return clusters
 
 
 # get means of each cluster
 def get_means(clusters, z):
-    k = len(clusters)
     means = np.array([]).reshape(0, 3)
     for i in range(k):
         cluster = clusters[i]
@@ -38,7 +40,6 @@ def get_means(clusters, z):
 
 # update center to be the clusters mean
 def fix_center(z, means):
-    k = len(z)
     for i in range(k):
         z[i] = means[i]
 
@@ -63,12 +64,17 @@ def logger(z):
     return log
 
 
+def plot(losses):
+    pass
+
+
 # Main
 orig_pixels = plt.imread("Image-Compressing/files/dog.jpeg")
 pixels = (orig_pixels.astype(float) / 255).reshape(-1, 3)
-z = np.loadtxt("Image-Compressing/files/cents5.txt").round(4)
+n = pixels.size / 3  # Num of pixels
+z = np.loadtxt("Image-Compressing/files/cents1.txt").round(4)  # Centeroids
+k = len(z)  # Num of centroids
 logger = logger(z)
-
 print('Learning, please wait . . .')
 for _ in range(19):
     clusters = cluster_points(pixels, z)
@@ -80,3 +86,5 @@ for _ in range(19):
     logger(z, APPEND)
 logger(z, FLUSH)
 print('Learning done')
+plot(losses)
+#End
