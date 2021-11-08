@@ -56,7 +56,7 @@ def logger(z):
         log_body += f"[iter {i}]:{s[:-1]}\n"
         i += 1
         if cmd == FLUSH:
-            _out = open("Image-Compressing/files/out.txt", "w")
+            _out = open(argv[3], "w")
             _out.write(log_body)
             _out.close()
             log_body = ''
@@ -67,16 +67,17 @@ def logger(z):
 # Function to draw graph
 def plot(losses):
     plt.xlabel('Iteration')
-    plt.ylabel('Loss')
+    plt.ylabel('Avg. loss')
+    plt.xticks(list(range(len(losses)))[0::2])
     plt.plot(list(range(len(losses))), losses)
     plt.show()
 
 
 # Main
-orig_pixels = plt.imread("Image-Compressing/files/dog.jpeg")
+orig_pixels = plt.imread(argv[1])
 pixels = (orig_pixels.astype(float) / 255).reshape(-1, 3)
 n = pixels.size / 3  # Num of pixels
-z = np.loadtxt("Image-Compressing/files/cents3.txt").round(4)  # Centeroids
+z = np.loadtxt(argv[2]).round(4)  # Centeroids
 k = len(z)  # Num of centroids
 logger = logger(z)
 print('Learning, please wait . . .')
